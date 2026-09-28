@@ -8,8 +8,8 @@ export function App() {
   return (
     <>
       <header className="site-header">
-        <Link to="/" className="brand">
-          Social Games
+        <Link to="/" className="brand" aria-label="Games - Social, home">
+          Games - Social
         </Link>
       </header>
       <main className="page">

@@ -28,15 +28,16 @@ button, select { font-family: inherit; }
 
 .site-header {
   padding: 14px 16px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
+  background: transparent;
 }
 
 .brand {
   font-weight: 700;
+  font-size: 1.1rem;
   text-decoration: none;
   color: var(--accent);
 }
+.brand:hover { color: var(--text); }
 
 .page {
   max-width: 960px;

@@ -1,0 +1,86 @@
+/* Tetris: board overlay, touch buttons, and home page cover. */
+
+.tetris-stage {
+  position: relative;
+  max-width: 412px;
+  margin: 0 auto;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.tetris-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px;
+  text-align: center;
+  border-radius: 12px;
+  background: rgb(0 0 0 / 0.65);
+  animation: tetris-pop 0.25s ease both;
+}
+.tetris-overlay p { margin: 0; color: var(--muted); max-width: 30ch; }
+.tetris-overlay strong { color: var(--text); }
+.tetris-overlay--over { animation-delay: 0.3s; }
+.tetris-overlay .tetris-overlay__title {
+  font-size: clamp(1.8rem, 7vw, 2.6rem);
+  font-weight: 800;
+  color: #38d9f5;
+  text-shadow: 0 4px 18px rgb(56 217 245 / 0.35);
+}
+.tetris-overlay .tetris-overlay__title--best {
+  color: #ffd23f;
+  text-shadow: 0 4px 18px rgb(255 210 63 / 0.45);
+}
+.tetris-overlay .tetris-overlay__target,
+.tetris-overlay .tetris-overlay__target strong { color: #ffd23f; }
+
+@keyframes tetris-pop {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+
+/* On-screen buttons, only on touch screens. */
+.tetris-pad {
+  display: none;
+  justify-content: center;
+  gap: 8px;
+  margin: 14px auto 0;
+}
+.tetris-pad button {
+  width: 58px;
+  height: 56px;
+  font: inherit;
+  font-size: 1.3rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text);
+  touch-action: manipulation;
+}
+.tetris-pad button:active { background: var(--accent); color: var(--accent-contrast); }
+.tetris-hint--touch { display: none; }
+@media (pointer: coarse) {
+  .tetris-pad { display: flex; }
+  .tetris-hint--keys { display: none; }
+  .tetris-hint--touch { display: inline; }
+  /* Board plus buttons always fit on screen together. */
+  .tetris-stage { max-width: min(412px, calc((100svh - 110px) * 412 / 560)); }
+}
+
+/* Cover art */
+.tetris-cover { width: 70%; height: 86%; }
+.tetris-cover__falling { animation: tetris-fall 2.4s ease-in infinite; }
+@keyframes tetris-fall {
+  0% { transform: translateY(-40px); opacity: 0; }
+  15% { opacity: 1; }
+  70%, 100% { transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tetris-overlay, .tetris-cover__falling { animation: none; }
+}

@@ -37,7 +37,7 @@ export default function HigherLower() {
             Streak <strong>{state.streak}</strong>
           </span>
           <span>
-            Your best <strong>{board.you?.score ?? 0}</strong>
+            Your best <strong>{board.data ? (board.you?.score ?? 0) : '–'}</strong>
           </span>
           <span>
             Top <strong title={board.top ? `by ${board.top.name}` : undefined}>{board.top?.score ?? '–'}</strong>

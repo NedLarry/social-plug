@@ -1,0 +1,118 @@
+/* Snake: board overlay, mode toggle, touch D-pad, and home page cover. */
+
+.snake-stage {
+  position: relative;
+  max-width: 576px;
+  margin: 0 auto;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.snake-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px;
+  text-align: center;
+  border-radius: 12px;
+  background: rgb(0 0 0 / 0.6);
+  backdrop-filter: blur(2px);
+  animation: snake-pop 0.25s ease both;
+}
+.snake-overlay p { margin: 0; color: var(--muted); max-width: 34ch; }
+.snake-overlay strong { color: var(--text); }
+.snake-overlay--over { animation-delay: 0.5s; }
+.snake-overlay .snake-overlay__title {
+  font-size: clamp(1.8rem, 7vw, 2.8rem);
+  font-weight: 800;
+  color: #8ef58e;
+  text-shadow: 0 4px 18px rgb(142 245 142 / 0.35);
+}
+.snake-overlay .snake-overlay__title--best {
+  color: #ffd23f;
+  text-shadow: 0 4px 18px rgb(255 210 63 / 0.45);
+  animation: snake-bounce 0.8s ease 0.6s infinite alternate;
+}
+
+@keyframes snake-pop {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes snake-bounce {
+  to { transform: translateY(-6px) rotate(-2deg); }
+}
+
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.segmented button {
+  font: inherit;
+  padding: 6px 12px;
+  border: 0;
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+}
+.segmented button[aria-pressed='true'] {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-weight: 700;
+}
+
+/* On-screen arrows, only on touch screens. */
+.dpad {
+  display: none;
+  grid-template-columns: repeat(3, 64px);
+  grid-template-areas: '. up .' 'left . right' '. down .';
+  gap: 6px;
+  width: max-content;
+  margin: 16px auto 0;
+}
+.dpad button {
+  height: 56px;
+  font: inherit;
+  font-size: 1.3rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text);
+  touch-action: manipulation;
+}
+.dpad button:active { background: var(--accent); color: var(--accent-contrast); }
+.dpad__up { grid-area: up; }
+.dpad__left { grid-area: left; }
+.dpad__right { grid-area: right; }
+.dpad__down { grid-area: down; }
+@media (pointer: coarse) {
+  .dpad { display: grid; }
+}
+
+/* Cover art */
+.snake-cover { width: 92%; height: 92%; overflow: visible; }
+.snake-cover__snake { animation: snake-slither 1.6s ease-in-out infinite alternate; transform-origin: 80px 80px; }
+.snake-cover__berry { animation: snake-berry 1.1s ease-in-out infinite alternate; transform-origin: 168px 36px; }
+.snake-cover__tongue { animation: snake-tongue 2.2s steps(1) infinite; }
+
+@keyframes snake-slither {
+  from { transform: translateY(2px) rotate(-1.5deg); }
+  to { transform: translate(4px, -3px) rotate(1.5deg); }
+}
+@keyframes snake-berry {
+  to { transform: scale(1.12); }
+}
+@keyframes snake-tongue {
+  0%, 85% { opacity: 0; }
+  86%, 100% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .snake-overlay, .snake-overlay__title--best, .snake-cover__snake, .snake-cover__berry { animation: none; }
+}

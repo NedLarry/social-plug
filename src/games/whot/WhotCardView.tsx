@@ -1,5 +1,6 @@
 import { SHAPES, type WhotCard } from './deck';
 import { getCardBackImage, getCardFaceImage } from './cardAssets';
+import './whot.css';
 
 interface Props {
   card: WhotCard;

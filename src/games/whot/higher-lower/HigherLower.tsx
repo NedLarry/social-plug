@@ -1,30 +1,13 @@
-import { useEffect, useReducer, useState } from 'react';
+import { useEffect, useReducer } from 'react';
+import { useHighScore } from '../../../shared';
 import { WhotCardView } from '../WhotCardView';
 import { higherLowerReducer, newGame } from './logic';
 
-const BEST_KEY = 'whot.higherLower.best';
-
-function readBest() {
-  try {
-    return Number(localStorage.getItem(BEST_KEY)) || 0;
-  } catch {
-    return 0;
-  }
-}
-
-export function HigherLower() {
+export default function HigherLower() {
   const [state, dispatch] = useReducer(higherLowerReducer, undefined, () => newGame());
-  const [best, setBest] = useState(readBest);
+  const [best, submitBest] = useHighScore('whot.higherLower.best');
 
-  useEffect(() => {
-    if (state.streak <= best) return;
-    setBest(state.streak);
-    try {
-      localStorage.setItem(BEST_KEY, String(state.streak));
-    } catch {
-      // Best score just won't persist.
-    }
-  }, [state.streak, best]);
+  useEffect(() => submitBest(state.streak), [state.streak, submitBest]);
 
   const status = state.over
     ? state.deck.length === 0 && state.lastResult !== 'wrong'
@@ -38,8 +21,8 @@ export function HigherLower() {
 
   return (
     <div className="hilo">
-      <div className="match__bar">
-        <div className="match__stats">
+      <div className="game-toolbar">
+        <div className="game-stats">
           <span>
             Streak <strong>{state.streak}</strong>
           </span>
@@ -55,7 +38,7 @@ export function HigherLower() {
         </button>
       </div>
 
-      <p className="match__status" aria-live="polite">
+      <p className="game-status" aria-live="polite">
         {status}
       </p>
 

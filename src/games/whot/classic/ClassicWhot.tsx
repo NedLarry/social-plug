@@ -7,7 +7,7 @@ import { canPlay, classicReducer, newGame, top } from './logic';
 const CPU_DELAY_MS = 900;
 const PICKABLE_SHAPES: WhotShape[] = ['circle', 'triangle', 'cross', 'square', 'star'];
 
-export function ClassicWhot() {
+export default function ClassicWhot() {
   const [playerCount, setPlayerCount] = useState(2);
   const [handSize, setHandSize] = useState(5);
   const [state, dispatch] = useReducer(classicReducer, undefined, () => newGame(playerCount, handSize));
@@ -50,8 +50,8 @@ export function ClassicWhot() {
 
   return (
     <div className="classic">
-      <div className="match__bar">
-        <div className="match__controls">
+      <div className="game-toolbar">
+        <div className="game-controls">
           <label>
             Players{' '}
             <select value={playerCount} onChange={(e) => restart(Number(e.target.value))}>
@@ -115,7 +115,7 @@ export function ClassicWhot() {
         </div>
       </div>
 
-      <p className="match__status" aria-live="polite">
+      <p className="game-status" aria-live="polite">
         {status}
       </p>
 

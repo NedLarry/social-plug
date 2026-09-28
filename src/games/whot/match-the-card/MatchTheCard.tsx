@@ -5,7 +5,7 @@ import { dealBoard, initState, isGameOver, matchReducer } from './logic';
 const BOARD_SIZES = [12, 20, 30];
 const MISS_DELAY_MS = 900;
 
-export function MatchTheCard() {
+export default function MatchTheCard() {
   const [size, setSize] = useState(20);
   const [state, dispatch] = useReducer(matchReducer, size, (n) => initState(dealBoard(n)));
 
@@ -34,8 +34,8 @@ export function MatchTheCard() {
 
   return (
     <div className="match">
-      <div className="match__bar">
-        <div className="match__stats">
+      <div className="game-toolbar">
+        <div className="game-stats">
           <span>
             Score <strong>{state.score}</strong>
           </span>
@@ -43,7 +43,7 @@ export function MatchTheCard() {
             Moves <strong>{state.moves}</strong>
           </span>
         </div>
-        <div className="match__controls">
+        <div className="game-controls">
           <label>
             Cards{' '}
             <select value={size} onChange={(e) => newGame(Number(e.target.value))}>
@@ -60,7 +60,7 @@ export function MatchTheCard() {
         </div>
       </div>
 
-      <p className="match__status" aria-live="polite">
+      <p className="game-status" aria-live="polite">
         {status}
       </p>
 

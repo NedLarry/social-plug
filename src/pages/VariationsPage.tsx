@@ -1,12 +1,7 @@
-import { Link, useParams } from 'react-router-dom';
-import { findGame } from '../games/registry';
-import { NotFound } from './NotFound';
+import { Link } from 'react-router-dom';
+import { playPath, type RegisteredGame } from '../games/registry';
 
-export function VariationsPage() {
-  const { gameId } = useParams();
-  const game = findGame(gameId);
-  if (!game) return <NotFound />;
-
+export function VariationsPage({ game }: { game: RegisteredGame }) {
   return (
     <>
       <Link to="/" className="back-link">
@@ -16,7 +11,7 @@ export function VariationsPage() {
       <p className="lead">Choose how you want to play.</p>
       <div className="tile-grid">
         {game.variations.map((v) => (
-          <Link key={v.id} to={`/games/${game.id}/${v.id}`} className="tile">
+          <Link key={v.id} to={playPath(game, v)} className="tile">
             <span className="tile__title">{v.name}</span>
             <span className="tile__desc">{v.description}</span>
           </Link>

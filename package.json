@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "cards": "node scripts/prepare-cards.mjs",
+    "new-game": "node scripts/new-game.mjs",
     "predev": "npm run cards",
     "dev": "vite",
     "prebuild": "npm run cards",

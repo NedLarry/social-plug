@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { setupCanvas, useGameLoop, useHighScore, useKeyDown } from '../../shared';
+import { Leaderboard, setupCanvas, useGameLoop, useKeyDown, useLeaderboard } from '../../shared';
 import { newGame, step, stepInterval, turn, type Dir, type Mode, type SnakeEvent } from './logic';
 import { BONUS_COLOR, CELL, FOOD_COLOR, drawScene, spawnBurst, spawnPopup, updateEffects, type Scene } from './render';
 import { setMuted, sounds } from './sound';
@@ -51,8 +51,10 @@ export default function Snake() {
   const [status, setStatus] = useState<Status>('ready');
   const [score, setScore] = useState(0);
   const [length, setLength] = useState(3);
-  const [newBest, setNewBest] = useState(false);
-  const [best, submitBest] = useHighScore(`snake.best.${mode}`);
+  // 'top' = beat this week's high score, 'personal' = beat your own best this week.
+  const [record, setRecord] = useState<'top' | 'personal' | null>(null);
+  const board = useLeaderboard(`snake-${mode}`);
+  const top = board.top;
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
@@ -60,7 +62,7 @@ export default function Snake() {
   if (!scene.current) scene.current = freshScene(mode);
   const statusRef = useRef<Status>('ready');
   const elapsed = useRef(0);
-  const bestRef = useRef(best);
+  const topRef = useRef(0);
   const swipe = useRef<{ x: number; y: number; moved: boolean } | null>(null);
 
   useEffect(() => {
@@ -68,8 +70,8 @@ export default function Snake() {
   }, []);
 
   useEffect(() => {
-    bestRef.current = best;
-  }, [best]);
+    topRef.current = top?.score ?? 0;
+  }, [top]);
 
   // Lets browser tests read the board (development builds only).
   useEffect(() => {
@@ -105,7 +107,7 @@ export default function Snake() {
     elapsed.current = 0;
     setScore(0);
     setLength(3);
-    setNewBest(false);
+    setRecord(null);
     go('ready');
   }
 
@@ -160,8 +162,11 @@ export default function Snake() {
         spawnBurst(sc.particles, e.at, '#ff3c50', 22, 180);
         sounds.die();
         const final = sc.state.score;
-        setNewBest(final > 0 && final > bestRef.current);
-        submitBest(final);
+        const beatTop = final > 0 && final > topRef.current;
+        setRecord(beatTop ? 'top' : null);
+        void board.submit(final).then((res) => {
+          if (res?.improved && final > 0 && !beatTop) setRecord('personal');
+        });
         go('over');
       }
     }
@@ -245,7 +250,7 @@ export default function Snake() {
             Score <strong>{score}</strong>
           </span>
           <span>
-            Best <strong>{best}</strong>
+            Top <strong title={top ? `by ${top.name}` : undefined}>{top?.score ?? '–'}</strong>
           </span>
           <span>
             Length <strong>{length}</strong>
@@ -288,6 +293,11 @@ export default function Snake() {
             <p>
               Eat the berries, grow long, and don&apos;t bite your own tail. {mode === 'wrap' ? 'Wrap mode: go off one edge and come back on the other.' : 'Walls mode: the edges bite!'}
             </p>
+            {top && (
+              <p className="snake-overlay__target">
+                Score to beat: <strong>{top.score}</strong> by {top.name}
+              </p>
+            )}
             <button type="button" className="btn btn--big" onClick={play}>
               Start
             </button>
@@ -304,12 +314,21 @@ export default function Snake() {
         )}
         {status === 'over' && (
           <div className="snake-overlay snake-overlay--over">
-            <p className={`snake-overlay__title${newBest ? ' snake-overlay__title--best' : ''}`}>
-              {newBest ? 'New best!' : 'Game over!'}
+            <p className={`snake-overlay__title${record ? ' snake-overlay__title--best' : ''}`}>
+              {record === 'top' ? 'New high score!' : record === 'personal' ? 'Personal best!' : 'Game over!'}
             </p>
             <p>
               Score <strong>{score}</strong> · Length <strong>{length}</strong>
             </p>
+            {record === 'top' ? (
+              <p className="snake-overlay__target">You&apos;re top of this week&apos;s leaderboard!</p>
+            ) : (
+              top && (
+                <p className="snake-overlay__target">
+                  Score to beat: <strong>{top.score}</strong> by {top.name}
+                </p>
+              )
+            )}
             <button type="button" className="btn btn--big" onClick={play}>
               Play again
             </button>
@@ -340,6 +359,8 @@ export default function Snake() {
           </button>
         ))}
       </div>
+
+      <Leaderboard board={board} title={`This week's top scores · ${mode === 'walls' ? 'Walls' : 'Wrap'}`} unit="pts" />
     </div>
   );
 }

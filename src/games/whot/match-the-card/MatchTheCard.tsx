@@ -1,4 +1,5 @@
-import { useEffect, useReducer, useState } from 'react';
+import { useEffect, useReducer, useRef, useState } from 'react';
+import { Leaderboard, useLeaderboard } from '../../../shared';
 import { WhotCardView } from '../WhotCardView';
 import { dealBoard, initState, isGameOver, matchReducer } from './logic';
 
@@ -21,6 +22,19 @@ export default function MatchTheCard() {
   };
 
   const over = isGameOver(state);
+  const board = useLeaderboard(`whot-match-${size}`);
+  const submitted = useRef(false);
+
+  // Save the score once when a game ends.
+  useEffect(() => {
+    if (!over) {
+      submitted.current = false;
+      return;
+    }
+    if (submitted.current) return;
+    submitted.current = true;
+    void board.submit(state.score);
+  }, [over, state.score, board]);
   const cleared = state.cards.every((c) => c.status === 'matched');
   const status = cleared
     ? `You matched every card! Final score: ${state.score}`
@@ -77,6 +91,7 @@ export default function MatchTheCard() {
           />
         ))}
       </div>
+      <Leaderboard board={board} title={`This week's top scores · ${size} cards`} />
     </div>
   );
 }

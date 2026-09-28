@@ -1,4 +1,5 @@
-import { useEffect, useReducer, useState } from 'react';
+import { useEffect, useReducer, useRef, useState } from 'react';
+import { Leaderboard, useLeaderboard } from '../../../shared';
 import { getCardBackImage } from '../cardAssets';
 import { SHAPES, type WhotShape } from '../deck';
 import { WhotCardView } from '../WhotCardView';
@@ -15,6 +16,19 @@ export default function ClassicWhot() {
 
   const me = state.players[0];
   const myTurn = state.current === 0 && state.winner === null;
+  const board = useLeaderboard('whot-classic-wins');
+  const submitted = useRef(false);
+
+  // Each win adds one to your total for the week.
+  useEffect(() => {
+    if (state.winner === null) {
+      submitted.current = false;
+      return;
+    }
+    if (submitted.current) return;
+    submitted.current = true;
+    if (state.winner === 0) void board.submit(1);
+  }, [state.winner, board]);
   const topCard = top(state);
 
   useEffect(() => {
@@ -168,6 +182,7 @@ export default function ClassicWhot() {
           <li key={state.log.length - i}>{line}</li>
         ))}
       </ul>
+      <Leaderboard board={board} title="Most wins this week" unit={['win', 'wins']} />
     </div>
   );
 }

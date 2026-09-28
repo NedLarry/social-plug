@@ -1,13 +1,23 @@
-import { useEffect, useReducer } from 'react';
-import { useHighScore } from '../../../shared';
+import { useEffect, useReducer, useRef } from 'react';
+import { Leaderboard, useLeaderboard } from '../../../shared';
 import { WhotCardView } from '../WhotCardView';
 import { higherLowerReducer, newGame } from './logic';
 
 export default function HigherLower() {
   const [state, dispatch] = useReducer(higherLowerReducer, undefined, () => newGame());
-  const [best, submitBest] = useHighScore('whot.higherLower.best');
+  const board = useLeaderboard('whot-higher-lower');
+  const submitted = useRef(false);
 
-  useEffect(() => submitBest(state.streak), [state.streak, submitBest]);
+  // Save the streak once when a game ends.
+  useEffect(() => {
+    if (!state.over) {
+      submitted.current = false;
+      return;
+    }
+    if (submitted.current) return;
+    submitted.current = true;
+    void board.submit(state.streak);
+  }, [state.over, state.streak, board]);
 
   const status = state.over
     ? state.deck.length === 0 && state.lastResult !== 'wrong'
@@ -27,7 +37,10 @@ export default function HigherLower() {
             Streak <strong>{state.streak}</strong>
           </span>
           <span>
-            Best <strong>{best}</strong>
+            Your best <strong>{board.you?.score ?? 0}</strong>
+          </span>
+          <span>
+            Top <strong title={board.top ? `by ${board.top.name}` : undefined}>{board.top?.score ?? '–'}</strong>
           </span>
           <span>
             Left <strong>{state.deck.length}</strong>
@@ -63,6 +76,7 @@ export default function HigherLower() {
           </button>
         </div>
       )}
+      <Leaderboard board={board} title="This week's longest streaks" />
     </div>
   );
 }

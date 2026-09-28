@@ -9,6 +9,6 @@ export function GamePage() {
   const { gameId } = useParams();
   const game = findGame(gameId);
   if (!game) return <NotFound />;
-  if (game.variations.length === 1) return <PlayPage game={game} variation={game.variations[0]} />;
+  if (game.variations.length === 1) return <PlayPage key={game.id} game={game} variation={game.variations[0]} />;
   return <VariationsPage game={game} />;
 }

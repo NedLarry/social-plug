@@ -59,13 +59,14 @@ export default defineGame({
 `;
 
 const canvasTsx = `import { useEffect, useRef, useState } from 'react';
-import { pointerPosition, setupCanvas, useGameLoop, useHighScore, useKeyDown } from '../../shared';
+import { Leaderboard, pointerPosition, setupCanvas, useGameLoop, useKeyDown, useLeaderboard } from '../../shared';
 
-// Starter game: move the square to collect dots. Replace with your own game.
+// Starter game: collect as many dots as you can in 30 seconds. Replace with your own game.
 const WIDTH = 480;
 const HEIGHT = 360;
 const SIZE = 20;
 const SPEED = 220; // units per second
+const ROUND_SECONDS = 30;
 
 const randomDot = () => ({ x: 20 + Math.random() * (WIDTH - 40), y: 20 + Math.random() * (HEIGHT - 40) });
 
@@ -77,9 +78,12 @@ export default function ${component}() {
   const held = useRef(new Set<string>());
   const target = useRef<{ x: number; y: number } | null>(null);
   const scoreRef = useRef(0);
+  const timeLeft = useRef(ROUND_SECONDS);
   const [score, setScore] = useState(0);
-  const [running, setRunning] = useState(true);
-  const [best, submitBest] = useHighScore('${id}.best');
+  const [seconds, setSeconds] = useState(ROUND_SECONDS);
+  const [over, setOver] = useState(false);
+  // This week's scores, saved under the player's name (asked before the game starts).
+  const board = useLeaderboard('${id}');
 
   useEffect(() => {
     ctxRef.current = setupCanvas(canvasRef.current!, WIDTH, HEIGHT);
@@ -92,10 +96,6 @@ export default function ${component}() {
   }, []);
 
   useKeyDown((e) => {
-    if (e.key === ' ') {
-      setRunning((r) => !r);
-      return true;
-    }
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'a', 's', 'd'].includes(e.key)) {
       held.current.add(e.key);
       target.current = null;
@@ -104,6 +104,14 @@ export default function ${component}() {
   });
 
   useGameLoop((dt) => {
+    if (timeLeft.current === 0) return; // round over; wait for Play again
+    timeLeft.current = Math.max(0, timeLeft.current - dt);
+    setSeconds(Math.ceil(timeLeft.current));
+    if (timeLeft.current === 0) {
+      setOver(true);
+      void board.submit(scoreRef.current); // game over: save the score
+    }
+
     const p = player.current;
     const keys = held.current;
     // Keys give a direction; a tap gives a point to walk to (and stop at).
@@ -125,7 +133,6 @@ export default function ${component}() {
       dot.current = randomDot();
       scoreRef.current += 1;
       setScore(scoreRef.current);
-      submitBest(scoreRef.current);
     }
 
     const ctx = ctxRef.current!;
@@ -136,14 +143,16 @@ export default function ${component}() {
     ctx.fill();
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(p.x - SIZE / 2, p.y - SIZE / 2, SIZE, SIZE);
-  }, running);
+  }, !over);
 
   const restart = () => {
     player.current = { x: WIDTH / 2, y: HEIGHT / 2 };
     dot.current = randomDot();
     scoreRef.current = 0;
+    timeLeft.current = ROUND_SECONDS;
     setScore(0);
-    setRunning(true);
+    setSeconds(ROUND_SECONDS);
+    setOver(false);
   };
 
   return (
@@ -154,19 +163,21 @@ export default function ${component}() {
             Score <strong>{score}</strong>
           </span>
           <span>
-            Best <strong>{best}</strong>
+            Time <strong>{seconds}</strong>
+          </span>
+          <span>
+            Top <strong>{board.top?.score ?? '–'}</strong>
           </span>
         </div>
         <div className="game-controls">
-          <button type="button" className="btn btn--ghost" onClick={() => setRunning((r) => !r)}>
-            {running ? 'Pause' : 'Resume'}
-          </button>
           <button type="button" className="btn" onClick={restart}>
-            Restart
+            {over ? 'Play again' : 'Restart'}
           </button>
         </div>
       </div>
-      <p className="game-status">Arrow keys / WASD, or tap where to go. Space pauses.</p>
+      <p className="game-status">
+        {over ? 'Time! Your score is saved to the leaderboard.' : 'Arrow keys / WASD, or tap where to go. Collect the dots!'}
+      </p>
       <canvas
         ref={canvasRef}
         className="game-canvas"
@@ -175,22 +186,40 @@ export default function ${component}() {
           if (e.buttons) target.current = pointerPosition(e.currentTarget, e, WIDTH, HEIGHT);
         }}
       />
+      <Leaderboard board={board} unit="pts" />
     </div>
   );
 }
 `;
 
-const reactTsx = `import { useState } from 'react';
-import { useHighScore } from '../../shared';
+const reactTsx = `import { useEffect, useState } from 'react';
+import { Leaderboard, useLeaderboard } from '../../shared';
 
-// Starter game built from regular page elements. Replace with your own game.
+// Starter game built from regular page elements: tap as many times as you can in 10 seconds.
+// Replace with your own game.
+const ROUND_SECONDS = 10;
+
 export default function ${component}() {
   const [score, setScore] = useState(0);
-  const [best, submitBest] = useHighScore('${id}.best');
+  const [seconds, setSeconds] = useState<number | null>(null); // null until the first tap
+  // This week's scores, saved under the player's name (asked before the game starts).
+  const board = useLeaderboard('${id}');
 
+  useEffect(() => {
+    if (seconds === null || seconds === 0) return;
+    const t = setTimeout(() => setSeconds(seconds - 1), 1000);
+    return () => clearTimeout(t);
+  }, [seconds]);
+
+  useEffect(() => {
+    if (seconds === 0) void board.submit(score); // game over: save the score
+  }, [seconds]);
+
+  const over = seconds === 0;
   const tap = () => {
+    if (over) return;
+    if (seconds === null) setSeconds(ROUND_SECONDS);
     setScore(score + 1);
-    submitBest(score + 1);
   };
 
   return (
@@ -201,19 +230,30 @@ export default function ${component}() {
             Score <strong>{score}</strong>
           </span>
           <span>
-            Best <strong>{best}</strong>
+            Time <strong>{seconds ?? ROUND_SECONDS}</strong>
+          </span>
+          <span>
+            Top <strong>{board.top?.score ?? '–'}</strong>
           </span>
         </div>
         <div className="game-controls">
-          <button type="button" className="btn btn--ghost" onClick={() => setScore(0)}>
+          <button
+            type="button"
+            className="btn btn--ghost"
+            onClick={() => {
+              setScore(0);
+              setSeconds(null);
+            }}
+          >
             Restart
           </button>
         </div>
       </div>
-      <p className="game-status">Tap the button!</p>
-      <button type="button" className="btn btn--big" onClick={tap}>
+      <p className="game-status">{over ? 'Time! Your score is saved to the leaderboard.' : 'Tap the button as fast as you can!'}</p>
+      <button type="button" className="btn btn--big" onClick={tap} disabled={over}>
         Tap
       </button>
+      <Leaderboard board={board} unit="taps" />
     </div>
   );
 }

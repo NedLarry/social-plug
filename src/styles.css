@@ -281,3 +281,81 @@ h1 { margin: 8px 0 16px; font-size: 1.6rem; }
 @media (prefers-reduced-motion: reduce) {
   .game-card, .feature { transition: none; }
 }
+
+/* Name prompt (before every game) */
+.name-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  max-width: 460px;
+  padding: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+.name-prompt__title { margin: 0; font-size: 1.5rem; font-weight: 800; }
+.name-prompt__lead { margin: 0; color: var(--muted); }
+.name-prompt__input {
+  width: 100%;
+  font: inherit;
+  font-size: 1.1rem;
+  padding: 10px 14px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.name-prompt__input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.name-prompt__input[aria-invalid='true'] { border-color: #ff5a6e; }
+.name-prompt__error { margin: -4px 0 0; color: #ff8a98; font-size: 0.9rem; }
+.name-prompt__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgb(0 0 0 / 0.7);
+}
+.name-prompt__backdrop .name-prompt { width: 100%; }
+
+.playing-as { margin: -6px 0 14px; color: var(--muted); font-size: 0.9rem; }
+.playing-as strong { color: var(--text); }
+.link-button {
+  font: inherit;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Weekly leaderboard */
+.leaderboard {
+  max-width: 576px;
+  margin: 24px auto 0;
+  padding: 16px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+.leaderboard__title { margin: 0 0 10px; font-size: 1.1rem; }
+.leaderboard__note { margin: 0; color: var(--muted); }
+.leaderboard__list { list-style: none; margin: 0; padding: 0; }
+.leaderboard__list li {
+  display: grid;
+  grid-template-columns: 2.2em 1fr auto;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+}
+.leaderboard__list li:nth-child(odd) { background: rgb(255 255 255 / 0.03); }
+.leaderboard__list li:first-child .leaderboard__rank { color: #ffd23f; }
+.leaderboard__list li.is-you { background: rgb(224 86 106 / 0.18); }
+.leaderboard__below { margin-top: 6px; border-top: 1px dashed var(--border); }
+.leaderboard__rank { color: var(--muted); font-weight: 700; }
+.leaderboard__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.leaderboard__you { color: var(--muted); font-size: 0.85em; }
+.leaderboard__score { font-weight: 700; }

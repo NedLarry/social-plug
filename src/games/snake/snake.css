@@ -27,6 +27,8 @@
 .snake-overlay p { margin: 0; color: var(--muted); max-width: 34ch; }
 .snake-overlay strong { color: var(--text); }
 .snake-overlay--over { animation-delay: 0.5s; }
+.snake-overlay .snake-overlay__target { color: #ffd23f; }
+.snake-overlay .snake-overlay__target strong { color: #ffd23f; }
 .snake-overlay .snake-overlay__title {
   font-size: clamp(1.8rem, 7vw, 2.8rem);
   font-weight: 800;

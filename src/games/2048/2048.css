@@ -1,0 +1,128 @@
+/* 2048: board, sliding tiles, overlays, and home page cover. */
+
+.t2048-stage {
+  position: relative;
+  max-width: 440px;
+  margin: 0 auto;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Square board. With a 3% gap, each of the 4 tiles is 21.25% wide, one step is 24.25%. */
+.t2048-board {
+  position: relative;
+  aspect-ratio: 1;
+  container-type: inline-size;
+  background: #1b1b1b;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.t2048-cell,
+.t2048-tile {
+  position: absolute;
+  left: calc(3% + var(--c) * 24.25%);
+  top: calc(3% + var(--r) * 24.25%);
+  width: 21.25%;
+  height: 21.25%;
+  border-radius: 10px;
+}
+.t2048-cell { background: #262626; }
+
+.t2048-tile {
+  display: grid;
+  place-items: center;
+  font-size: 10cqw;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 2px 0 rgb(0 0 0 / 0.2);
+  box-shadow: inset 0 -4px 0 rgb(0 0 0 / 0.18);
+  transition: left 110ms ease-in-out, top 110ms ease-in-out;
+  z-index: 1;
+}
+.t2048-tile.v128, .t2048-tile.v256, .t2048-tile.v512 { font-size: 8.5cqw; }
+.t2048-tile.is-big { font-size: 7cqw; }
+.t2048-tile.is-new { animation: t2048-appear 180ms ease 110ms both; }
+.t2048-tile.is-merged { animation: t2048-pop 200ms ease 100ms both; z-index: 2; }
+
+/* A playful rainbow as the numbers grow. */
+.t2048-tile.v2 { background: #3a4a5c; }
+.t2048-tile.v4 { background: #3f6e8f; }
+.t2048-tile.v8 { background: #2fa3a0; }
+.t2048-tile.v16 { background: #35b56a; }
+.t2048-tile.v32 { background: #8fc23a; }
+.t2048-tile.v64 { background: #e0b92e; color: #1b1b1b; text-shadow: none; }
+.t2048-tile.v128 { background: #f29b2e; }
+.t2048-tile.v256 { background: #f0663a; }
+.t2048-tile.v512 { background: #e0566a; }
+.t2048-tile.v1024 { background: #c34bd6; box-shadow: 0 0 18px rgb(195 75 214 / 0.55); }
+.t2048-tile.v2048 { background: #ffd23f; color: #1b1b1b; text-shadow: none; box-shadow: 0 0 26px rgb(255 210 63 / 0.75); }
+.t2048-tile.v4096 { background: #ffffff; color: #1b1b1b; text-shadow: none; box-shadow: 0 0 26px rgb(255 255 255 / 0.6); }
+
+@keyframes t2048-appear {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
+@keyframes t2048-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+/* "+8" floats up from the score when tiles merge. */
+/* Space is reserved after the score so the popup doesn't cover its neighbours. */
+.t2048-score { position: relative; padding-right: 2.8em; }
+.t2048-score__pop {
+  position: absolute;
+  left: calc(100% - 2.6em);
+  top: 0;
+  font-weight: 800;
+  color: #5fdc7a;
+  pointer-events: none;
+  animation: t2048-rise 0.7s ease-out both;
+}
+@keyframes t2048-rise {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-14px); }
+}
+
+.t2048-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px;
+  text-align: center;
+  border-radius: 14px;
+  background: rgb(0 0 0 / 0.7);
+  animation: t2048-fade 0.3s ease both;
+}
+.t2048-overlay--over { animation-delay: 0.4s; }
+.t2048-overlay p { margin: 0; color: var(--muted); }
+.t2048-overlay strong { color: var(--text); }
+.t2048-overlay .t2048-overlay__title { font-size: clamp(1.7rem, 7vw, 2.4rem); font-weight: 800; color: #ffd23f; }
+.t2048-overlay .t2048-overlay__title.is-record { text-shadow: 0 4px 18px rgb(255 210 63 / 0.5); }
+.t2048-overlay .t2048-overlay__target,
+.t2048-overlay .t2048-overlay__target strong { color: #ffd23f; }
+@keyframes t2048-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Cover art */
+.t2048-cover { width: 58%; height: 86%; }
+.t2048-cover__pop { animation: t2048-cover-pop 2.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes t2048-cover-pop {
+  0%, 70%, 100% { transform: scale(1); }
+  80% { transform: scale(1.15); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t2048-tile { transition: none; }
+  .t2048-tile.is-new, .t2048-tile.is-merged, .t2048-overlay, .t2048-cover__pop { animation: none; }
+}

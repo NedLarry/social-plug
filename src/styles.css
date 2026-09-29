@@ -106,6 +106,27 @@ h1 { margin: 8px 0 16px; font-size: 1.6rem; }
 
 .game-toolbar + .game-status { margin: 8px 0 12px; }
 
+/* Pill toggle for modes/difficulties: <div class="segmented"> of buttons with aria-pressed. */
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.segmented button {
+  font: inherit;
+  padding: 6px 12px;
+  border: 0;
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+}
+.segmented button[aria-pressed='true'] {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-weight: 700;
+}
+
 /* Canvas games: fill the page width up to the game's own size (set inline). */
 .game-canvas {
   display: block;

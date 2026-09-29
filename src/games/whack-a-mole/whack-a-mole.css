@@ -1,0 +1,169 @@
+/* Whack-a-Mole: field of holes, popping critters, mallet cursor, overlays, cover. */
+
+.wam-timer {
+  max-width: 480px;
+  height: 8px;
+  margin: 0 auto 12px;
+  border-radius: 999px;
+  background: var(--surface);
+  overflow: hidden;
+}
+.wam-timer__bar { height: 100%; background: linear-gradient(90deg, #ff5a6e, #ffd23f, #5fdc7a); border-radius: inherit; }
+
+.wam-combo.is-hot strong { color: #ffd23f; text-shadow: 0 0 10px rgb(255 210 63 / 0.6); }
+
+.wam-stage {
+  position: relative;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.wam-field {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4%;
+  padding: 3% 5% 8%;
+  border-radius: 18px;
+  background: radial-gradient(circle at 50% 30%, #3f7a3a, #24481f 75%);
+  border: 1px solid #2f5a2a;
+  /* A mallet for a cursor. */
+  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'><rect x='17' y='14' width='6' height='24' rx='2' fill='%23b07a45' transform='rotate(-35 20 26)'/><rect x='6' y='3' width='26' height='14' rx='4' fill='%23e0566a' stroke='%23000' stroke-opacity='.3' transform='rotate(-35 19 10)'/></svg>") 12 8, pointer;
+}
+.wam-field.is-shaking { animation: wam-shake 0.35s ease; }
+
+.wam-hole {
+  position: relative;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: inherit;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.wam-back {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 10%;
+  height: 28%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 40%, #0d0906 55%, #3a2618);
+}
+/* The critter peeks out through this window; its bottom edge is the middle of the hole. */
+.wam-window {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  top: 0;
+  bottom: 24%;
+  overflow: hidden;
+}
+.wam-critter {
+  position: absolute;
+  inset: 12% 4% 0;
+  transform: translateY(105%);
+  transition: transform 110ms ease-out;
+}
+.wam-critter.is-up { transform: translateY(0); }
+.wam-svg { width: 100%; height: 100%; display: block; }
+.wam-front {
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  bottom: 4%;
+  height: 20%;
+  border-radius: 50%;
+  background: linear-gradient(#6b4a2e, #4a3120);
+  clip-path: inset(45% 0 0 0);
+}
+.wam-hole.is-bonked .wam-critter.is-up { animation: wam-squash 0.15s ease; }
+.wam-stars { animation: wam-spin 0.6s linear infinite; transform-origin: 50px 20px; }
+.wam-spark { animation: wam-flicker 0.2s steps(2) infinite; }
+
+.wam-popup {
+  position: absolute;
+  left: 50%;
+  top: 10%;
+  z-index: 2;
+  font-weight: 800;
+  font-size: clamp(1rem, 4.5vw, 1.4rem);
+  white-space: nowrap;
+  pointer-events: none;
+  text-shadow: 0 2px 0 rgb(0 0 0 / 0.6);
+  animation: wam-rise 0.75s ease-out both;
+}
+.wam-popup.is-good { color: #fff; }
+.wam-popup.is-gold { color: #ffd23f; }
+.wam-popup.is-bad { color: #ff5a6e; }
+
+@keyframes wam-rise {
+  from { opacity: 1; transform: translate(-50%, 0) scale(0.8); }
+  30% { transform: translate(-50%, -12px) scale(1.15); }
+  to { opacity: 0; transform: translate(-50%, -40px) scale(1); }
+}
+@keyframes wam-squash {
+  50% { transform: translateY(8%) scaleY(0.85); }
+}
+@keyframes wam-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes wam-flicker {
+  50% { opacity: 0.4; }
+}
+@keyframes wam-shake {
+  20% { transform: translate(-6px, 2px); }
+  40% { transform: translate(6px, -2px); }
+  60% { transform: translate(-4px, 1px); }
+  80% { transform: translate(3px, 0); }
+}
+
+.wam-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px;
+  text-align: center;
+  border-radius: 18px;
+  background: rgb(0 0 0 / 0.72);
+  animation: wam-pop 0.25s ease both;
+}
+.wam-overlay--over { animation-delay: 0.3s; }
+.wam-overlay p { margin: 0; color: var(--muted); max-width: 32ch; }
+.wam-overlay strong { color: var(--text); }
+.wam-overlay .wam-overlay__title { font-size: clamp(1.8rem, 7vw, 2.6rem); font-weight: 800; color: #8ef58e; }
+.wam-overlay .wam-overlay__title.is-record { color: #ffd23f; text-shadow: 0 4px 18px rgb(255 210 63 / 0.45); }
+.wam-overlay .wam-overlay__target,
+.wam-overlay .wam-overlay__target strong { color: #ffd23f; }
+@keyframes wam-pop {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+
+.wam-legend { display: flex; gap: 18px; list-style: none; margin: 4px 0; padding: 0; font-weight: 800; }
+.wam-legend li { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.wam-legend__icon { width: 44px; height: 44px; }
+
+/* Cover art */
+.wam-cover { width: 76%; height: 88%; }
+.wam-cover__mole { animation: wam-cover-peek 2s ease-in-out infinite; }
+.wam-cover__mallet { animation: wam-cover-swing 2s ease-in-out infinite; transform-origin: 150px 60px; }
+@keyframes wam-cover-peek {
+  0%, 100% { transform: translateY(26px); }
+  25%, 60% { transform: translateY(0); }
+}
+@keyframes wam-cover-swing {
+  0%, 45% { transform: rotate(0); }
+  55% { transform: rotate(-28deg); }
+  70%, 100% { transform: rotate(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wam-critter { transition: none; }
+  .wam-field.is-shaking, .wam-stars, .wam-spark, .wam-overlay, .wam-cover__mole, .wam-cover__mallet { animation: none; }
+}

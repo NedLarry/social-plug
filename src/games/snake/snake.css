@@ -49,26 +49,6 @@
   to { transform: translateY(-6px) rotate(-2deg); }
 }
 
-.segmented {
-  display: inline-flex;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-}
-.segmented button {
-  font: inherit;
-  padding: 6px 12px;
-  border: 0;
-  background: var(--surface);
-  color: var(--muted);
-  cursor: pointer;
-}
-.segmented button[aria-pressed='true'] {
-  background: var(--accent);
-  color: var(--accent-contrast);
-  font-weight: 700;
-}
-
 /* On-screen arrows, only on touch screens. */
 .dpad {
   display: none;
